@@ -17,19 +17,22 @@ class StockController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request)
-    {   
-        $categories = Category::all();
-        $category_id = 0;
-        if(count($categories)){
-            $category_id = $categories[0]->id; 
-        }
-        if(isset($request->category_id)){
-            $category_id = $request->category_id;
-        }
-          
-        $menus = Menu::all()->where('category_id',$category_id);
-        $data = array('menus'=>$menus,'categories'=>$categories,'selectedCategory'=>$category_id);
-        return view ('inventory.stock')->with('data',$data);
+    {
+        // Get only categories with IDs 17 and 21
+        $categories = Category::whereIn('id', [17, 21])->get();
+        
+        // Get menus grouped by category
+        $menus = Menu::whereIn('category_id', [17, 21])
+                     ->with('category')
+                     ->get()
+                     ->groupBy('category_id');
+        
+        $data = array(
+            'menus' => $menus,
+            'categories' => $categories
+        );
+        
+        return view('inventory.stock')->with('data', $data);
     }
 
     /**

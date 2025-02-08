@@ -3,30 +3,7 @@
 @section('content')
 <div class="container py-4">
     <div class="row">
-        <div class="col-12 mb-4">
-            <div class="card shadow-sm">
-                <div class="card-header bg-black text-white p-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">Service Charge Summary</h5>
-                        <select name="month" class="form-select-dark w-auto" onchange="this.form.submit()" form="month-form">
-                            @foreach($months as $value => $label)
-                                <option value="{{ $value }}" {{ $selectedMonth == $value ? 'selected' : '' }}>
-                                    {{ $label }}
-                                </option>
-                            @endforeach
-                        </select>
-                        <form id="month-form" action="{{ route('home') }}" method="GET"></form>
-                    </div>
-                </div>
-                <div class="card-body bg-light">
-                    <div class="alert alert-dark shadow-sm text-center">
-                        <h4 class="mb-0">Total S/C for {{ Carbon\Carbon::parse($selectedMonth)->format('F Y') }}: 
-                            <span class="fw-bold">Rs {{ number_format($serviceCharge, 2) }}</span>
-                        </h4>
-                    </div>
-                </div>
-            </div>
-        </div>
+        
 
         <div class="col-12">
             <div class="card shadow-sm">
@@ -42,18 +19,20 @@
                         @foreach([
                             ['route' => 'management', 'title' => 'Management', 'icon' => 'management'],
                             ['route' => 'cashier', 'title' => 'Cashier', 'icon' => 'cashier'],
-                            ['route' => 'inventory', 'title' => 'Beer & Soft Drink Stock', 'icon' => 'bottle'],
+                            ['route' => 'inventory', 'title' => 'Water & Soft Drink', 'icon' => 'bottle'],
                             ['route' => 'report', 'title' => 'Report', 'icon' => 'report', 'admin' => true],
                             ['url' => '/calendar', 'title' => 'Booking Calendar', 'icon' => 'calendar'],
                             ['url' => '/stock', 'title' => 'Grocery Item Store', 'icon' => 'food'],
                             ['url' => '/inv-inventory', 'title' => 'Physical Item Inventory', 'icon' => 'inv'],
                             ['url' => '/costs', 'title' => 'Daily Expense', 'icon' => 'expense'],
                             ['url' => '/tasks', 'title' => 'Daily Tasks', 'icon' => 'task'],
-                            ['url' => '/rooms/availability', 'title' => 'Room Availability', 'icon' => 'room'],
+                          
                             ['url' => '/staff/attendance', 'title' => 'Staff Attendance', 'icon' => 'attendance'], 
-                            ['url' => '/vehicle-security', 'title' => 'Security Management', 'icon' => 'vehicle'],
-                            ['url' => '/packages', 'title' => 'Hotel Packages', 'icon' => 'package'],
-                            ['url' => '/quotations', 'title' => 'Quotations', 'icon' => 'quotation'],
+                           
+                           
+
+
+                            
                             ['url' => '/damage-items', 'title' => 'Damage Items', 'icon' => 'damage'],
                             ['url' => '/salary', 'title' => 'Monthly Salay', 'icon' => 'salary'],
                             ['url' => '/service-charge', 'title' => 'service-charge', 'icon' => 'service'],
@@ -81,73 +60,8 @@
 
 
 
-    <div class="card mt-4 shadow-sm">
-   <div class="card-header bg-black text-white d-flex justify-content-between align-items-center p-3">
-       <h5 class="mb-0">Room Check-in Vehicles</h5>
-       <form action="{{ route('home') }}" method="GET" class="d-flex align-items-center">
-           <input type="date" 
-                  name="date" 
-                  class="form-control form-control-sm me-2 dark-input" 
-                  value="{{ request('date', date('Y-m-d')) }}">
-           <button type="submit" class="btn btn-sm btn-outline-light">Filter</button>
-       </form>
-   </div>
-   <div class="card-body">
-       <div class="table-responsive">
-           <table class="table table-hover">
-               <thead class="table-dark">
-                   <tr>
-                       <th>Check In Time</th>
-                       <th>Vehicle Number</th>
-                       <th>Room Numbers</th>
-                       <th>Description</th>
-                       <th>Check Out Time</th>
-                       <th>Status</th>
-                   </tr>
-               </thead>
-               <tbody>
-                   @forelse($roomVehicles as $vehicle)
-                       @if($vehicle->room_numbers && is_array(json_decode($vehicle->room_numbers)) && !empty(json_decode($vehicle->room_numbers)))
-                           <tr class="{{ $vehicle->team ? 'team-'.str_replace(' ', '', $vehicle->team) : '' }}">
-                               <td>{{ $vehicle->created_at->format('Y-m-d H:i') }}</td>
-                               <td>{{ $vehicle->vehicle_number }}</td>
-                               <td>
-                                   @foreach(json_decode($vehicle->room_numbers) as $room)
-                                       <span class="room-badge">{{ $room }}</span>
-                                   @endforeach
-                               </td>
-                               <td>{{ $vehicle->description }}</td>
-                               <td>
-                                   @if($vehicle->checkout_time)
-                                       <span class="text-success">
-                                           {{ $vehicle->checkout_time->format('Y-m-d H:i') }}
-                                       </span>
-                                   @else
-                                       <span class="text-warning">Not checked out</span>
-                                   @endif
-                               </td>
-                               <td>
-                                   @if($vehicle->checkout_time)
-                                       <span class="badge bg-success">Checked Out</span>
-                                   @else
-                                       <span class="badge bg-warning text-dark">Checked In</span>
-                                   @endif
-                               </td>
-                           </tr>
-                       @endif
-                   @empty
-                       <tr>
-                           <td colspan="6" class="text-center text-muted py-4">
-                               No room check-ins found for selected date
-                           </td>
-                       </tr>
-                   @endforelse
-               </tbody>
-           </table>
-       </div>
-   </div>
-</div>
-
+    
+  
 
 
     <div class="card mt-4 shadow-sm">
