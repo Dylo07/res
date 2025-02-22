@@ -25,6 +25,8 @@
                             ['url' => '/stock', 'title' => 'Grocery Item Store', 'icon' => 'food'],
                             ['url' => '/inv-inventory', 'title' => 'Physical Item Inventory', 'icon' => 'inv'],
                             ['url' => '/costs', 'title' => 'Daily Expense', 'icon' => 'expense'],
+                            ['url' => '/cashier/balance', 'title' => 'Cashier Balance', 'icon' => 'balance'],
+                            
                             ['url' => '/tasks', 'title' => 'Daily Tasks', 'icon' => 'task'],
                           
                             ['url' => '/staff/attendance', 'title' => 'Staff Attendance', 'icon' => 'attendance'], 
