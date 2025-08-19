@@ -233,14 +233,7 @@ Route::middleware(['auth'])->group(function () {
        ->name('quotations.print');
 
 
-       // Cashier Balance Routes
-Route::prefix('cashier')->name('cashier.')->group(function () {
-    Route::get('/balance', [CashierBalanceController::class, 'index'])->name('balance');
-    Route::post('/balance/update-opening', [CashierBalanceController::class, 'updateOpeningBalance'])->name('update-opening-balance');
-    Route::post('/balance/add-transaction', [CashierBalanceController::class, 'addManualTransaction'])->name('add-manual-transaction');
-    Route::post('/balance/close-day', [CashierBalanceController::class, 'closeDay'])->name('close-day');
-    Route::get('/balance/report', [CashierBalanceController::class, 'generateReport'])->name('report');
-});
+
 });
 
 
@@ -321,6 +314,8 @@ Route::middleware(['auth'])->group(function () {
     // Generate service charge for a specific employee
     Route::post('/service-charge/generate', [ServiceChargeController::class, 'generateServiceCharge'])
         ->name('service-charge.generate');
+
+     
  
     // Print service charge receipt for a specific service charge record
     Route::get('/service-charge/{id}/print', [ServiceChargeController::class, 'printServiceCharge'])
@@ -330,6 +325,15 @@ Route::middleware(['auth'])->group(function () {
      ->name('service-charge.points');
  Route::post('/service-charge/points/update-bulk', [ServiceChargeController::class, 'updatePointsBulk'])
      ->name('service-charge.points.update-bulk');
+
+               // Cashier Balance Routes
+Route::prefix('cashier')->name('cashier.')->group(function () {
+    Route::get('/balance', [CashierBalanceController::class, 'index'])->name('balance');
+    Route::post('/balance/update-opening', [CashierBalanceController::class, 'updateOpeningBalance'])->name('update-opening-balance');
+    Route::post('/balance/add-transaction', [CashierBalanceController::class, 'addManualTransaction'])->name('add-manual-transaction');
+    Route::post('/balance/close-day', [CashierBalanceController::class, 'closeDay'])->name('close-day');
+    Route::get('/balance/report', [CashierBalanceController::class, 'generateReport'])->name('report');
+});
  });
 
     });
