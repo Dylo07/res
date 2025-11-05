@@ -107,6 +107,11 @@ Route::get('/stock/monthly', [InventoryController::class, 'viewMonthlyStock'])->
 
 Route::resource('inventory/table', App\Http\Controllers\Inventory\TableController::class);
 
+ // routes for inventory
+     Route::post('inventory/storestock/{itemid}', 'App\Http\Controllers\Inventory\StockController@store')->name('Stock.storeStock');
+     Route::delete('inventory/removeStock/{itemid}', 'App\Http\Controllers\Inventory\StockController@destroy')->name('Stock.removeStock');
+
+
 Route::get('/categories-products', [InventoryController::class, 'categoriesProducts'])
     ->name('categories-products.index');
 
@@ -278,10 +283,7 @@ Route::middleware(['auth', 'VerifyAdmin'])->group(function(){
      
      // cashier
    
-     // routes for inventory
-     Route::post('inventory/storestock/{itemid}', 'App\Http\Controllers\Inventory\StockController@store')->name('Stock.storeStock');
-     Route::delete('inventory/removeStock/{itemid}', 'App\Http\Controllers\Inventory\StockController@destroy')->name('Stock.removeStock');
-
+    
 
      // Export to excel
      Route::get('/report/show/export', 'App\Http\Controllers\Report\ReportController@export');
