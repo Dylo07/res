@@ -7,15 +7,13 @@
             <div class="d-flex justify-content-between align-items-center">
                 <h3 class="mb-0">Staff Manual Attendance</h3>
                 <div>
-                    @if(Auth::user()->checkAdmin())
-                        <a href="{{ route('attendance.manual.add-staff-form') }}" class="btn btn-primary me-2">
-                            <i class="fas fa-user-plus"></i> Add Staff Member
-                        </a>
-                        <a href="{{ route('attendance.manual.manage-categories') }}" class="btn btn-success me-2">
-                            <i class="fas fa-tags"></i> Manage Categories
-                        </a>
-                    @endif
-                    <a href="{{ route('attendance.manual.report') }}" class="btn btn-info">View Report</a>
+                <a href="{{ route('attendance.manual.add-staff-form') }}" class="btn btn-primary me-2">
+    <i class="fas fa-user-plus"></i> Add Staff Member
+</a>
+<a href="{{ route('attendance.manual.manage-categories') }}" class="btn btn-success me-2">
+    <i class="fas fa-tags"></i> Manage Categories
+</a>
+<a href="{{ route('attendance.manual.report') }}" class="btn btn-info">View Report</a>
                 </div>
             </div>
         </div>
