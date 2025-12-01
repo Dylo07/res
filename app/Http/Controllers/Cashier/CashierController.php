@@ -26,9 +26,7 @@ class CashierController extends Controller
         
         foreach($tables as $table){
             $html .= '<div class="col-lg-2 col-md-3 col-sm-1 mb-2">';
-            $html .= '<button tabindex ="-1" class="btn btn-dark btn-outline-secondary btn-table" data-id="'.$table->id.'" data-name="'.$table->name.'" >
-            <img class="img-fluid" style="width:0%" src="'.url('/image/table.svg').'"/>
-            <br>';
+            $html .= '<button tabindex="-1" class="btn btn-dark btn-outline-secondary btn-table" data-id="'.$table->id.'" data-name="'.$table->name.'" >';
             if($table->status == "available"){
                 $html .= '<span class="badge badge-pill badge-success">'.$table->name.'</span>';
             }else{

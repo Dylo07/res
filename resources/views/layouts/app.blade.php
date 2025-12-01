@@ -30,6 +30,9 @@
     <!-- Vite Scripts -->
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
 
+    <!-- Page-specific styles -->
+    @stack('styles')
+
     <!-- Add attendance specific styles -->
     <style>
         .badge-success {

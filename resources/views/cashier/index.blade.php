@@ -438,9 +438,6 @@ function convertTablesToModernCards(htmlString) {
         
         modernHtml += `
             <div class="table-card ${statusClass} btn-table" data-id="${tableId}" data-name="${tableName}">
-                <div class="table-icon">
-                    🍽️
-                </div>
                 <div class="table-name">${tableName}</div>
                 <div class="table-status ${statusBg}">${statusText}</div>
             </div>

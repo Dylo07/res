@@ -30,13 +30,26 @@
                             </select>
                         </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Staff Category</label>
+                            <select name="staff_category" class="form-control">
+                                <option value="">All Categories</option>
+                                @foreach($categories as $value => $name)
+                                    <option value="{{ $value }}" {{ request('staff_category') == $value ? 'selected' : '' }}>
+                                        {{ $name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
                         <div class="form-group">
                             <label>Start Date</label>
                             <input type="date" name="start_date" class="form-control" value="{{ $startDate->format('Y-m-d') }}">
                         </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <div class="form-group">
                             <label>End Date</label>
                             <input type="date" name="end_date" class="form-control" value="{{ $endDate->format('Y-m-d') }}">
@@ -89,41 +102,46 @@
 
             <!-- Attendance Table -->
             <div class="table-responsive">
-    <table class="table table-bordered table-sm">
-        <thead>
-            <tr>
-                <th class="align-middle">Date</th>
-                @foreach($staff as $member)
-                    <th class="align-middle text-center">{{ $member->name }}</th>
-                @endforeach
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($dates as $date)
-                <tr>
-                    <td class="align-middle">{{ \Carbon\Carbon::parse($date)->format('Y-m-d') }}</td>
-                    @foreach($staff as $member)
-                        <td class="text-center align-middle">
-                            @php
-                                $attendance = $attendanceMap[$date][$member->id] ?? null;
-                                $statusClass = !$attendance ? 'secondary' : 
-                                    ($attendance->status === 'present' ? 'success' : 
-                                    ($attendance->status === 'half' ? 'warning' : 'danger'));
-                                $statusText = !$attendance ? 'Not Marked' : ucfirst($attendance->status);
-                            @endphp
-                            <span class="badge badge-{{ $statusClass }}">
-                                {{ $statusText }}
-                            </span>
-                            @if($attendance && $attendance->remarks)
-                                <small class="d-block text-muted mt-1">{{ $attendance->remarks }}</small>
-                            @endif
-                        </td>
-                    @endforeach
-                </tr>
-            @endforeach
-        </tbody>
-    </table>
-</div>
+                <table class="table table-bordered table-sm">
+                    <thead>
+                        <tr>
+                            <th class="align-middle">Date</th>
+                            @foreach($staff as $member)
+                                <th class="align-middle text-center">
+                                    {{ $member->name }}
+                                    @if($member->staffCategory)
+                                        <small class="d-block text-muted">{{ ucfirst(str_replace('_', ' ', $member->staffCategory->category)) }}</small>
+                                    @endif
+                                </th>
+                            @endforeach
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($dates as $date)
+                            <tr>
+                                <td class="align-middle">{{ \Carbon\Carbon::parse($date)->format('Y-m-d') }}</td>
+                                @foreach($staff as $member)
+                                    <td class="text-center align-middle">
+                                        @php
+                                            $attendance = $attendanceMap[$date][$member->id] ?? null;
+                                            $statusClass = !$attendance ? 'secondary' : 
+                                                ($attendance->status === 'present' ? 'success' : 
+                                                ($attendance->status === 'half' ? 'warning' : 'danger'));
+                                            $statusText = !$attendance ? 'Not Marked' : ucfirst($attendance->status);
+                                        @endphp
+                                        <span class="badge badge-{{ $statusClass }}">
+                                            {{ $statusText }}
+                                        </span>
+                                        @if($attendance && $attendance->remarks)
+                                            <small class="d-block text-muted mt-1">{{ $attendance->remarks }}</small>
+                                        @endif
+                                    </td>
+                                @endforeach
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>

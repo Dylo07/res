@@ -214,10 +214,26 @@ Route::middleware(['web', 'auth'])->group(function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/manual-attendance', [ManualAttendanceController::class, 'index'])->name('attendance.manual.index');
     Route::post('/manual-attendance/mark', [ManualAttendanceController::class, 'markAttendance'])->name('attendance.manual.mark');
-    Route::post('/manual-attendance/checkout', [ManualAttendanceController::class, 'markCheckout'])->name('attendance.manual.checkout');
+    Route::post('/manual-attendance/toggle', [ManualAttendanceController::class, 'toggleAttendance'])->name('attendance.manual.toggle');
+    Route::get('/manual-attendance/staff/{personId}/history', [ManualAttendanceController::class, 'getStaffAttendanceHistory'])->name('attendance.manual.staff.history');
     Route::get('/manual-attendance/report', [ManualAttendanceController::class, 'report'])->name('attendance.manual.report');
-});
+    
+    // Add these two routes for the staff member functionality (EXISTING)
+    Route::post('/manual-attendance/search-persons', [ManualAttendanceController::class, 'searchPersons'])->name('attendance.manual.search-persons');
+    Route::post('/manual-attendance/add-staff', [ManualAttendanceController::class, 'addStaffMember'])->name('attendance.manual.add-staff');
+    Route::get('/manual-attendance/add-staff', [ManualAttendanceController::class, 'showAddStaffForm'])->name('attendance.manual.add-staff-form');
 
+    Route::get('/manual-attendance/manage-categories', [ManualAttendanceController::class, 'showManageCategories'])
+            ->name('attendance.manual.manage-categories');
+    
+    // Route for updating a single staff category (EXISTING)
+    Route::post('/manual-attendance/update-category', [ManualAttendanceController::class, 'updateStaffCategory'])
+            ->name('attendance.manual.update-category');
+    
+    // Route for bulk updating staff categories (EXISTING)
+    Route::post('/manual-attendance/bulk-update-categories', [ManualAttendanceController::class, 'bulkUpdateCategories'])
+            ->name('attendance.manual.bulk-update-categories');
+});
 
 // Package Management Routes
 Route::middleware(['auth'])->group(function () {
