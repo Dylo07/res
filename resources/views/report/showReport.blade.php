@@ -98,56 +98,6 @@
               </div>
             </div>
             
-            <!-- Sales Summary by Item -->
-            <div class="card mb-4">
-              <div class="card-header bg-dark text-white">
-                <h4 class="mb-0">Items Sold Summary</h4>
-              </div>
-              <div class="card-body">
-                <table class="table table-striped table-hover">
-                  <thead class="thead-light">
-                    <tr>
-                      <th>Category</th>
-                      <th>Item Name</th>
-                      <th class="text-right">Quantity</th>
-                      <th class="text-right">Unit Price</th>
-                      <th class="text-right">Total Price</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @php 
-                      $CategoryNew='';
-                      $grandTotal = 0;
-                    @endphp
-                    @foreach($summarySales as $item)
-                      @if ($CategoryNew != $item->name)
-                        <tr class="table-secondary">
-                          <td colspan="5"><strong>{{$item->name}}</strong></td>
-                        </tr>
-                        @php 
-                          $CategoryNew= $item->name;
-                        @endphp
-                      @endif
-                      <tr>
-                        <td></td>
-                        <td>{{$item->menu_name}}</td>
-                        <td class="text-right"><strong>{{$item->qty_sum}}</strong></td>
-                        <td class="text-right">Rs {{number_format($item->avg_price, 2)}}</td>
-                        <td class="text-right"><strong>Rs {{number_format($item->total_price, 2)}}</strong></td>
-                      </tr>
-                      @php
-                        $grandTotal += $item->total_price;
-                      @endphp
-                    @endforeach
-                    <tr class="table-dark">
-                      <td colspan="4" class="text-right"><strong>Grand Total:</strong></td>
-                      <td class="text-right"><strong>Rs {{number_format($grandTotal, 2)}}</strong></td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
             <!-- Suspicious Bills Section -->
             @if($suspiciousBills->count() > 0)
             <div class="card mb-4 border-warning">
@@ -301,6 +251,55 @@
               {{$sales->appends($_GET)->links()}}
             </div>
             
+            <!-- Sales Summary by Item -->
+            <div class="card mb-4 mt-4">
+              <div class="card-header bg-dark text-white">
+                <h4 class="mb-0">Items Sold Summary</h4>
+              </div>
+              <div class="card-body">
+                <table class="table table-hover mb-0">
+                  <thead class="thead-dark">
+                    <tr>
+                      <th>Category</th>
+                      <th>Item Name</th>
+                      <th class="text-right">Quantity</th>
+                      <th class="text-right">Unit Price</th>
+                      <th class="text-right">Total Price</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @php 
+                      $CategoryNew='';
+                      $grandTotal = 0;
+                    @endphp
+                    @foreach($summarySales as $item)
+                      @if ($CategoryNew != $item->name)
+                        <tr class="bg-light">
+                          <td colspan="5"><strong>{{$item->name}}</strong></td>
+                        </tr>
+                        @php 
+                          $CategoryNew= $item->name;
+                        @endphp
+                      @endif
+                      <tr>
+                        <td></td>
+                        <td>{{$item->menu_name}}</td>
+                        <td class="text-right"><strong>{{$item->qty_sum}}</strong></td>
+                        <td class="text-right">Rs {{number_format($item->avg_price, 2)}}</td>
+                        <td class="text-right"><strong>Rs {{number_format($item->total_price, 2)}}</strong></td>
+                      </tr>
+                      @php
+                        $grandTotal += $item->total_price;
+                      @endphp
+                    @endforeach
+                    <tr class="table-dark">
+                      <td colspan="4" class="text-right"><strong>Grand Total:</strong></td>
+                      <td class="text-right"><strong>Rs {{number_format($grandTotal, 2)}}</strong></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
 
 
             
