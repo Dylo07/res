@@ -91,7 +91,7 @@ class CashierController extends Controller
         $saleDetail->menu_id = $menu->id;
         $saleDetail->menu_name = $menu->name;
         $saleDetail->menu_price = $menu->price;
-        $saleDetail->quantity = $request->quantity;
+        $saleDetail->quantity = $request->quantity > 0 ? $request->quantity : 1;
         $saleDetail->count = 1;
         $saleDetail->save();
 
@@ -198,6 +198,11 @@ class CashierController extends Controller
     public function changesQuantity(Request $request){
         $saleDetail_id = $request->saleDetail_id;
         $qty = $request->qty;
+        
+        if ($qty < 1) {
+            $qty = 1;
+        }
+        
         $saleDetail = SaleDetail::where('id',$saleDetail_id)->first();
 
         // Update quantity
@@ -295,6 +300,12 @@ class CashierController extends Controller
     public function savePayment(Request $request){
         $saleID = $request->saleID;
         $recievedAmount = $request->recievedAmount;
+        
+        // Prevent negative received amount (service charge)
+        if ($recievedAmount < 0) {
+            $recievedAmount = 0;
+        }
+        
         $paymentType = $request->PaymentType;
         
         // Begin transaction for data consistency

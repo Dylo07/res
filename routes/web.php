@@ -25,6 +25,7 @@ use App\Http\Controllers\DamageItemController;
 use App\Http\Controllers\SalaryController;
 use App\Http\Controllers\ServiceChargeController;
 use App\Http\Controllers\CashierBalanceController;
+use App\Http\Controllers\FingerprintDeviceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -79,43 +80,62 @@ Route::middleware(['auth'])->group(function(){
     Route::post('pettycash/store', 'App\Http\Controllers\PettycashController@store')->name(('pettycash.store'));
     Route::get('pettycash/destroy/{id}', 'App\Http\Controllers\PettycashController@destroy')->name(('pettycash.destroy'));
 
-});Route::get('/management',function(){
-    return view('management.index'); 
- })->name('management');
- 
- 
- 
- // routes for management
- Route::resource('management/category', App\Http\Controllers\Management\CategoryController::class);
- Route::resource('management/menu', App\Http\Controllers\Management\MenuController::class);
- Route::resource('management/table', App\Http\Controllers\Management\TableController::class);
+    // Menu management - accessible to all authenticated users (cashiers need to update prices)
+    // Negative price protection is handled by validation in MenuController
+    Route::get('/management',function(){
+        return view('management.index'); 
+    })->name('management');
+    Route::resource('management/menu', App\Http\Controllers\Management\MenuController::class);
+    Route::get('/management/menu-activity-log', [App\Http\Controllers\Management\MenuController::class, 'activityLog'])->name('menu.activity-log');
+    
+    // Table management - accessible to all authenticated users
+    Route::resource('management/table', App\Http\Controllers\Management\TableController::class);
+    
+    // Category management - accessible to all authenticated users EXCEPT delete
+    Route::resource('management/category', App\Http\Controllers\Management\CategoryController::class)->except(['destroy']);
 
- // route for inventory
- Route::get('/inventory',function(){
-    return view('inventory.index'); 
- })->name('inventory');
+});
 
- // routes for inventory
-Route::resource('inventory/category', App\Http\Controllers\Inventory\CategoryController::class);
-Route::resource('inventory/menu', App\Http\Controllers\Inventory\MenuController::class);
-Route::resource('inventory/stock', App\Http\Controllers\Inventory\StockController::class);
+// Admin-only routes
+Route::middleware(['auth', 'VerifyAdmin'])->group(function(){
+    
+    // Category delete - Admin only
+    Route::delete('management/category/{category}', [App\Http\Controllers\Management\CategoryController::class, 'destroy'])
+        ->name('category.destroy');
 
-Route::post('inventory/stockFilterByCategory', 'App\Http\Controllers\Inventory\StockController@index')->name('Stock.stockFilterByCategory');
+    // route for inventory
+    Route::get('/inventory',function(){
+        return view('inventory.index'); 
+    })->name('inventory');
 
-Route::get('inventory/stock/{itemid}', 'App\Http\Controllers\Inventory\StockController@show')->name('Stock.show');
-Route::get('/stock/monthly', [InventoryController::class, 'viewMonthlyStock'])->name('stock.monthly');
+    // routes for inventory
+    Route::resource('inventory/category', App\Http\Controllers\Inventory\CategoryController::class);
+    Route::resource('inventory/menu', App\Http\Controllers\Inventory\MenuController::class);
+    Route::resource('inventory/stock', App\Http\Controllers\Inventory\StockController::class);
+    
+    Route::post('inventory/stockFilterByCategory', 'App\Http\Controllers\Inventory\StockController@index')->name('Stock.stockFilterByCategory');
+    
+    Route::get('inventory/stock/{itemid}', 'App\Http\Controllers\Inventory\StockController@show')->name('Stock.show');
+    Route::get('/stock/monthly', [InventoryController::class, 'viewMonthlyStock'])->name('stock.monthly');
+    
+    Route::resource('inventory/table', App\Http\Controllers\Inventory\TableController::class);
+    
+    // routes for inventory
+    Route::post('inventory/storestock/{itemid}', 'App\Http\Controllers\Inventory\StockController@store')->name('Stock.storeStock');
+    Route::delete('inventory/removeStock/{itemid}', 'App\Http\Controllers\Inventory\StockController@destroy')->name('Stock.removeStock');
+    
+    Route::get('/categories-products', [InventoryController::class, 'categoriesProducts'])
+        ->name('categories-products.index');
 
-Route::resource('inventory/table', App\Http\Controllers\Inventory\TableController::class);
-
- // routes for inventory
-     Route::post('inventory/storestock/{itemid}', 'App\Http\Controllers\Inventory\StockController@store')->name('Stock.storeStock');
-     Route::delete('inventory/removeStock/{itemid}', 'App\Http\Controllers\Inventory\StockController@destroy')->name('Stock.removeStock');
-
-
-Route::get('/categories-products', [InventoryController::class, 'categoriesProducts'])
-    ->name('categories-products.index');
-
-
+    Route::resource('management/user',App\Http\Controllers\Management\UserController::class);
+    
+    //route for report
+    Route::get('/report', 'App\Http\Controllers\Report\ReportController@index')->name('report');
+    Route::get('/report/show', 'App\Http\Controllers\Report\ReportController@show');
+    
+    // Export to excel
+    Route::get('/report/show/export', 'App\Http\Controllers\Report\ReportController@export');
+});
 
 // routes for calender
 Route::get('/calendar', function () {
@@ -281,30 +301,6 @@ Route::post('/rooms/{room}/update-checklist', [RoomAvailabilityController::class
     Route::post('/rooms/{room}/guest-in', [RoomAvailabilityController::class, 'guestIn'])->name('rooms.guest-in');
     Route::post('/rooms/{room}/guest-out', [RoomAvailabilityController::class, 'guestOut'])->name('rooms.guest-out');
     
-
-Route::middleware(['auth', 'VerifyAdmin'])->group(function(){
-
- 
-     
-     // routes for management
-   
-     Route::resource('management/user',App\Http\Controllers\Management\UserController::class);
-
-     //route for report
-     
-     Route::get('/report', 'App\Http\Controllers\Report\ReportController@index')->name('report');
-     
-     
-     Route::get('/report/show', 'App\Http\Controllers\Report\ReportController@show');
-     
-     // cashier
-   
-    
-
-     // Export to excel
-     Route::get('/report/show/export', 'App\Http\Controllers\Report\ReportController@export');
-     
-    
 //salary
 Route::middleware(['auth'])->group(function () {
    Route::get('/salary', [SalaryController::class, 'index'])->name('salary.index');
@@ -352,6 +348,4 @@ Route::prefix('cashier')->name('cashier.')->group(function () {
     Route::post('/balance/close-day', [CashierBalanceController::class, 'closeDay'])->name('close-day');
     Route::get('/balance/report', [CashierBalanceController::class, 'generateReport'])->name('report');
 });
- });
-
-    });
+});

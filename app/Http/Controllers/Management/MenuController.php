@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Category;
 use App\Models\Menu;
+use App\Models\MenuActivityLog;
+use Illuminate\Support\Facades\Auth;
 class MenuController extends Controller
 {
     /**
@@ -15,8 +17,9 @@ class MenuController extends Controller
      */
     public function index()
     {
-        $menus = Menu::all();
-        return view ('management.menu')->with('menus',$menus);
+        $categories = Category::with('menus')->get();
+        $menus = Menu::with('category')->orderBy('category_id')->orderBy('name')->get();
+        return view ('management.menu')->with('menus',$menus)->with('categories', $categories);
     }
 
     /**
@@ -40,7 +43,7 @@ class MenuController extends Controller
     {
         $request->validate([
             'name'=>'required|unique:menus|max:255',
-            'price'=>'required|numeric',
+            'price'=>'required|numeric|min:0',
              'category_id' =>  'required|numeric'
 
     ]);
@@ -64,6 +67,19 @@ class MenuController extends Controller
     $menu->description = $request->description;
     $menu->category_id =$request->category_id;
     $menu->save();
+    
+    // Log activity
+    MenuActivityLog::create([
+        'user_id' => Auth::id(),
+        'user_name' => Auth::user()->name,
+        'menu_id' => $menu->id,
+        'menu_name' => $menu->name,
+        'action' => 'Create',
+        'details' => 'Created menu: ' . $menu->name,
+        'old_price' => null,
+        'new_price' => $menu->price
+    ]);
+    
     $request->session()->flash('status',$request->name. ' is saved successfully');
     return redirect('/management/menu');
 }
@@ -104,10 +120,15 @@ class MenuController extends Controller
         //information validation
         $request->validate([
             'name'=>'required|max:255',
-            'price'=>'required|numeric',
+            'price'=>'required|numeric|min:0',
             'category_id'=>'required|numeric'
         ]);
         $menu = Menu::find($id);
+        
+        // Store old values for logging
+        $oldPrice = $menu->price;
+        $oldName = $menu->name;
+        
         //validate if a user upload a image
         if($request->image){
             $request->validate([
@@ -120,7 +141,7 @@ class MenuController extends Controller
 
             }
             $imageName =date('mdYHis').uniqid().'.'.$request->image->extension();
-        $request->image->move(public_path(menu_images),$imageName);
+        $request->image->move(public_path('menu_images'),$imageName);
         } else { $imageName = $menu->image;
 
         }
@@ -130,6 +151,26 @@ class MenuController extends Controller
         $menu->description = $request->description;
         $menu->category_id = $request->category_id;
         $menu->save();
+        
+        // Log activity - especially price changes
+        $details = '';
+        if ($oldPrice != $menu->price) {
+            $details = 'Updated menu: ' . $oldName . ' | Price changed from Rs ' . number_format($oldPrice, 2) . ' to Rs ' . number_format($menu->price, 2);
+        } else {
+            $details = 'Updated menu: ' . $oldName;
+        }
+        
+        MenuActivityLog::create([
+            'user_id' => Auth::id(),
+            'user_name' => Auth::user()->name,
+            'menu_id' => $menu->id,
+            'menu_name' => $menu->name,
+            'action' => 'Update',
+            'details' => $details,
+            'old_price' => $oldPrice,
+            'new_price' => $menu->price
+        ]);
+        
         $request -> session ()->flash('status',$request->name. ' is updated succesfully');
         return redirect('/management/menu');
     }
@@ -148,10 +189,53 @@ class MenuController extends Controller
 
         }
         $menuName=$menu->name;
+        $menuPrice = $menu->price;
+        
+        // Log activity before deletion
+        MenuActivityLog::create([
+            'user_id' => Auth::id(),
+            'user_name' => Auth::user()->name,
+            'menu_id' => $menu->id,
+            'menu_name' => $menuName,
+            'action' => 'Delete',
+            'details' => 'Deleted menu: ' . $menuName . ' (Rs ' . number_format($menuPrice, 2) . ')',
+            'old_price' => $menuPrice,
+            'new_price' => null
+        ]);
+        
         $menu->delete();
         Session()->flash('status',$menuName. ' is deleted Successfully');
          return redirect('management/menu');
         
         ;
+    }
+    
+    /**
+     * Display menu activity logs
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function activityLog(Request $request)
+    {
+        $query = MenuActivityLog::with('user')->orderBy('created_at', 'desc');
+        
+        // Filter by action if provided
+        if ($request->has('action') && $request->action != '') {
+            $query->where('action', $request->action);
+        }
+        
+        // Filter by date if provided
+        if ($request->has('date') && $request->date != '') {
+            $query->whereDate('created_at', $request->date);
+        }
+        
+        // Filter by user if provided
+        if ($request->has('user') && $request->user != '') {
+            $query->where('user_name', 'like', '%' . $request->user . '%');
+        }
+        
+        $logs = $query->paginate(50);
+        
+        return view('management.menuActivityLog')->with('logs', $logs);
     }
 }

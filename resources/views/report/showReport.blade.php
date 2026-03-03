@@ -22,109 +22,284 @@
         </nav>
       </div>
     </div>
+    <!-- Current Viewing Date Range -->
+    <div class="alert alert-info mb-3" role="alert">
+      <h5 class="mb-0"><i class="fa fa-calendar"></i> Currently Viewing: <strong>{{ request('dateStart', date('m/d/Y')) }}</strong> to <strong>{{ request('dateEnd', date('m/d/Y')) }}</strong></h5>
+    </div>
+
+    <div class="row">
+      <form action="/report/show" method="GET">
+        <div class="col-md-12">
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>Choose Start Date For Report</label>
+                <div class="input-group date" id="date-start" data-target-input="nearest">
+                      <input type="text" name="dateStart" class="form-control datetimepicker-input" data-target="#date-start" value="{{ request('dateStart', date('m/d/Y')) }}"/>
+                      <div class="input-group-append" data-target="#date-start" data-toggle="datetimepicker">
+                          <div class="input-group-text"><i class="fa fa-calendar" style="font-size:25px;"></i></div>
+                      </div>
+                  </div>
+              </div>  
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>Choose End Date For Report</label>
+                <div class="input-group date" id="date-end" data-target-input="nearest">
+                    <input type="text" name="dateEnd" class="form-control datetimepicker-input" data-target="#date-end" value="{{ request('dateEnd', date('m/d/Y')) }}"/>
+                    <div class="input-group-append" data-target="#date-end" data-toggle="datetimepicker">
+                        <div class="input-group-text"><i class="fa fa-calendar" style="font-size:25px;"></i></div>
+                    </div>
+                </div>
+              </div>    
+            </div>
+  
+          </div>
+          <br>
+
+          <input class="btn btn-primary" type="submit" value="Show Report">
+        
+        </div>
+      </form>
+    </div>
+    <br>
     <div class="row">
         <div class="col-md-12">
           @if($sales->count() > 0)
-            <div class="alert alert-success" role="alert">
-              <p>The Total Amount of Sale from {{$dateStart}} to {{$dateEnd}} is Rs {{number_format($totalSale, 2)}}  </p>
-              <p>The Total Amount of S/C {{$dateStart}} to {{$dateEnd}} is Rs {{number_format($serviceCharge, 2)}}  </p>
-              <p>Total Result: {{$sales->total()}}</p>
+            <!-- Summary Cards at Top -->
+            <div class="row mb-4">
+              <div class="col-md-4">
+                <div class="card text-white bg-success">
+                  <div class="card-body">
+                    <h5 class="card-title">Total Sales</h5>
+                    <h2 class="mb-0">Rs {{number_format($totalSale, 2)}}</h2>
+                    <small>Period total revenue</small>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="card text-white bg-info">
+                  <div class="card-body">
+                    <h5 class="card-title">Service Charge</h5>
+                    <h2 class="mb-0">Rs {{number_format($serviceCharge, 2)}}</h2>
+                    <small>Total S/C collected</small>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="card text-white bg-primary">
+                  <div class="card-body">
+                    <h5 class="card-title">Total Receipts</h5>
+                    <h2 class="mb-0">{{$sales->total()}}</h2>
+                    <small>Number of transactions</small>
+                  </div>
+                </div>
+              </div>
             </div>
-            <table class="table">
-              <thead>
-                <tr class="bg-primary text-light">
-                  <th scope="col">#</th>
-                  <th scope="col">Receipt ID</th>
-                  <th scope="col">Date Time</th>
-                  <th scope="col">Table</th>
-                  <th scope="col">Staff</th>
-                  <th scope="col">Total Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                @php 
-                  $countSale = ($sales->currentPage() - 1) * $sales->perPage() + 1;
-                @endphp 
-                @foreach($sales as $sale)
-                  <tr class="bg-primary text-light">
-                    <td>{{$countSale++}}</td>
-                    <td>{{$sale->id}}</td>
-                    <td>{{date("m/d/Y H:i:s", strtotime($sale->updated_at))}}</td>
-                    <td>{{$sale->table_name}}</td>
-                    <td>{{$sale->user_name}}</td>
-                    <td>{{$sale->total_price}}</td>
-                    <td>{{$sale->total_recieved}}</td>
-                    <td>{{$sale->change}}</td>
-                  </tr>
-                  <tr >
-                    <th></th>
-                    <th>Menu ID</th>
-                    <th>Menu</th>
-                    <th>Quantity</th>
-                    <th>Price</th>
-                    <th> Price</th>
-                    <th>Service Charge</th>
-                    <th>Total Price</th>
-                  </tr>
-                
-                  @foreach($sale->saleDetails as $saleDetail)
+            
+            <!-- Sales Summary by Item -->
+            <div class="card mb-4">
+              <div class="card-header bg-dark text-white">
+                <h4 class="mb-0">Items Sold Summary</h4>
+              </div>
+              <div class="card-body">
+                <table class="table table-striped table-hover">
+                  <thead class="thead-light">
                     <tr>
-                      <td></td>
-                      <td>{{$saleDetail->menu_id}}</td>
-                      <td>{{$saleDetail->menu_name}}</td>
-                      <td>{{$saleDetail->quantity}}</td>
-                      <td>{{$saleDetail->menu_price}}</td>
-                      <td>{{$saleDetail->menu_price * $saleDetail->quantity}}</td>
-                      <td colspan="2"></td>
+                      <th>Category</th>
+                      <th>Item Name</th>
+                      <th class="text-right">Quantity</th>
+                      <th class="text-right">Unit Price</th>
+                      <th class="text-right">Total Price</th>
                     </tr>
-                  @endforeach
-                @endforeach
-
-                    <tr class="bg-dark text-light">
-                      <th colspan ="8" class="text-center">Summary</th>
-                    </tr>
-
-                    <tr>
-                      <th colspan ="2">Menu Id</th>
-                      <th colspan ="3">Menu</th>
-                      
-                      <th colspan ="3">Quantity</th>
-                        
-                    </tr>
+                  </thead>
+                  <tbody>
                     @php 
                       $CategoryNew='';
+                      $grandTotal = 0;
                     @endphp
-                    
-                    @foreach($summarySales as $sale)
-                    @if ($CategoryNew != $sale->name)
+                    @foreach($summarySales as $item)
+                      @if ($CategoryNew != $item->name)
+                        <tr class="table-secondary">
+                          <td colspan="5"><strong>{{$item->name}}</strong></td>
+                        </tr>
+                        @php 
+                          $CategoryNew= $item->name;
+                        @endphp
+                      @endif
                       <tr>
-                      <td colspan ="8" align="center"><b>{{$sale->name}}</b></td>
+                        <td></td>
+                        <td>{{$item->menu_name}}</td>
+                        <td class="text-right"><strong>{{$item->qty_sum}}</strong></td>
+                        <td class="text-right">Rs {{number_format($item->avg_price, 2)}}</td>
+                        <td class="text-right"><strong>Rs {{number_format($item->total_price, 2)}}</strong></td>
                       </tr>
-                    @endif
-                    
-                    @php 
-                      $CategoryNew= $sale->name;
-                    @endphp
-  
-                    <tr>
-                      <td colspan ="2">{{$sale->menu_id}}</td>
-                      <td colspan ="3">{{$sale->menu_name}}</td>
-                      <td colspan ="3">{{$sale->qty_sum}}</td>
-                        
-                    </tr>
+                      @php
+                        $grandTotal += $item->total_price;
+                      @endphp
                     @endforeach
-              </tbody>
-            </table>
+                    <tr class="table-dark">
+                      <td colspan="4" class="text-right"><strong>Grand Total:</strong></td>
+                      <td class="text-right"><strong>Rs {{number_format($grandTotal, 2)}}</strong></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Suspicious Bills Section -->
+            @if($suspiciousBills->count() > 0)
+            <div class="card mb-4 border-warning">
+              <div class="card-header bg-warning text-dark">
+                <h4 class="mb-0">
+                  <i class="fas fa-exclamation-triangle"></i> Suspicious Bills (Price Mismatch)
+                  <span class="badge badge-danger">{{$suspiciousBills->count()}} Found</span>
+                </h4>
+                <small>Items billed at different price than current menu price - possible fraud!</small>
+              </div>
+              <div class="card-body">
+                <div class="table-responsive">
+                  <table class="table table-striped table-hover table-sm">
+                    <thead class="thead-light">
+                      <tr>
+                        <th>Receipt #</th>
+                        <th>Date/Time</th>
+                        <th>Item</th>
+                        <th class="text-right">Billed Price</th>
+                        <th class="text-right">Current Price</th>
+                        <th class="text-right">Qty</th>
+                        <th class="text-right">Difference</th>
+                        <th class="text-right">Total Loss/Gain</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @php
+                        $totalDifference = 0;
+                      @endphp
+                      @foreach($suspiciousBills as $bill)
+                      <tr class="{{ $bill->price_difference < 0 ? 'table-danger' : 'table-info' }}">
+                        <td><strong>#{{$bill->sale_id}}</strong></td>
+                        <td><small>{{date('m/d/Y H:i', strtotime($bill->updated_at))}}</small></td>
+                        <td>{{$bill->menu_name}}</td>
+                        <td class="text-right">
+                          <span class="badge badge-warning">Rs {{number_format($bill->billed_price, 2)}}</span>
+                        </td>
+                        <td class="text-right">Rs {{number_format($bill->current_price, 2)}}</td>
+                        <td class="text-right">{{$bill->quantity}}</td>
+                        <td class="text-right">
+                          @if($bill->price_difference < 0)
+                            <span class="text-danger"><strong>-Rs {{number_format(abs($bill->price_difference), 2)}}</strong></span>
+                          @else
+                            <span class="text-success">+Rs {{number_format($bill->price_difference, 2)}}</span>
+                          @endif
+                        </td>
+                        <td class="text-right">
+                          @if($bill->total_difference < 0)
+                            <span class="text-danger"><strong>-Rs {{number_format(abs($bill->total_difference), 2)}}</strong></span>
+                          @else
+                            <span class="text-success">+Rs {{number_format($bill->total_difference, 2)}}</span>
+                          @endif
+                        </td>
+                      </tr>
+                      @php
+                        $totalDifference += $bill->total_difference;
+                      @endphp
+                      @endforeach
+                      <tr class="table-dark">
+                        <td colspan="7" class="text-right"><strong>Total Discrepancy:</strong></td>
+                        <td class="text-right">
+                          <strong class="{{ $totalDifference < 0 ? 'text-danger' : 'text-success' }}">
+                            @if($totalDifference < 0)
+                              -Rs {{number_format(abs($totalDifference), 2)}}
+                            @else
+                              +Rs {{number_format($totalDifference, 2)}}
+                            @endif
+                          </strong>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="alert alert-info mt-3">
+                  <i class="fas fa-info-circle"></i> <strong>Note:</strong> 
+                  Red rows indicate items sold below current price (potential revenue loss). 
+                  Check <a href="{{ route('menu.activity-log') }}" target="_blank">Menu Activity Log</a> to see who changed prices.
+                </div>
+              </div>
+            </div>
+            @endif
+
+            <!-- Individual Receipts -->
+            <div class="card">
+              <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Individual Receipts ({{$sales->total()}})</h4>
+              </div>
+              <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                  <thead class="thead-light">
+                    <tr>
+                      <th width="5%">#</th>
+                      <th width="10%">Receipt ID</th>
+                      <th width="20%">Date & Time</th>
+                      <th width="15%">Table</th>
+                      <th width="15%">Staff</th>
+                      <th width="15%" class="text-right">Bill Amount</th>
+                      <th width="10%" class="text-right">S/C</th>
+                      <th width="10%" class="text-right">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @php 
+                      $countSale = ($sales->currentPage() - 1) * $sales->perPage() + 1;
+                    @endphp 
+                    @foreach($sales as $sale)
+                      <tr data-toggle="collapse" data-target="#receipt-{{$sale->id}}" class="clickable-row" style="cursor: pointer;">
+                        <td>{{$countSale++}}</td>
+                        <td><strong>{{$sale->id}}</strong></td>
+                        <td>{{date("m/d/Y H:i", strtotime($sale->updated_at))}}</td>
+                        <td>{{$sale->table_name}}</td>
+                        <td>{{$sale->user_name}}</td>
+                        <td class="text-right">Rs {{number_format($sale->total_price, 2)}}</td>
+                        <td class="text-right">Rs {{number_format($sale->total_recieved, 2)}}</td>
+                        <td class="text-right"><strong>Rs {{number_format($sale->change, 2)}}</strong></td>
+                      </tr>
+                      <tr class="collapse" id="receipt-{{$sale->id}}">
+                        <td colspan="8" class="bg-light">
+                          <div class="p-3">
+                            <h6 class="text-muted mb-2">Items Ordered:</h6>
+                            <table class="table table-sm table-bordered mb-0">
+                              <thead>
+                                <tr>
+                                  <th>Item Name</th>
+                                  <th class="text-center">Quantity</th>
+                                  <th class="text-right">Unit Price</th>
+                                  <th class="text-right">Total</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                @foreach($sale->saleDetails as $saleDetail)
+                                  <tr>
+                                    <td>{{$saleDetail->menu_name}}</td>
+                                    <td class="text-center">{{$saleDetail->quantity}}</td>
+                                    <td class="text-right">Rs {{number_format($saleDetail->menu_price, 2)}}</td>
+                                    <td class="text-right">Rs {{number_format($saleDetail->menu_price * $saleDetail->quantity, 2)}}</td>
+                                  </tr>
+                                @endforeach
+                              </tbody>
+                            </table>
+                          </div>
+                        </td>
+                      </tr>
+                    @endforeach
+                  </tbody>
+                </table>
+              </div>
+            </div>
    
-            {{$sales->appends($_GET)->links()}}
-
-            
-
-<div id="buttons">
-            <a href="/export/salereport">
-            <button class="btn btn-back">
-                Show Report
-            </button>
+            <div class="mt-3">
+              {{$sales->appends($_GET)->links()}}
+            </div>
             
 
 
@@ -138,14 +313,42 @@
     </div>
   </div>
 
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.39.0/css/tempusdominus-bootstrap-4.min.css" integrity="sha512-3JRrEUwaCkFUBLK1N8HehwQgu8e23jTH4np5NHOmQOobuC4ROQxFwFgBLTnhcnQRMs84muMh0PnnwXlPq5MGjg==" crossorigin="anonymous" />
+  
+  <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.0/moment.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.39.0/js/tempusdominus-bootstrap-4.min.js" integrity="sha512-k6/Bkb8Fxf/c1Tkyl39yJwcOZ1P4cRrJu77p83zJjN2Z55prbFHxPs9vN7q3l3+tSMGPDdoH51AEU8Vgo1cgAA==" crossorigin="anonymous"></script>
+  
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+  
+  <style>
+    .clickable-row:hover {
+      background-color: #f8f9fa !important;
+    }
+    .card {
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      border-radius: 8px;
+    }
+    .card-header h4 {
+      font-weight: 600;
+    }
+  </style>
+  
+  <script type="text/javascript">
+      $(function () {
+          $('#date-start').datetimepicker({
+            format : 'L'
+          });
+          $('#date-end').datetimepicker({
+            format : 'L'
+          });
+          
+          // Add click hint for expandable rows
+          $('.clickable-row').attr('title', 'Click to view order details');
+      });
+  </script>
+
 @endsection
-<script src="https://code.jquery.com/jquery-3.4.1.js"></script>
-		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.0.1/js/tempusdominus-bootstrap-4.min.js"></script>
-		<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.1.2/js/tempusdominus-bootstrap-4.js"></script>
-        <script type="text/javascript"></script>
          
