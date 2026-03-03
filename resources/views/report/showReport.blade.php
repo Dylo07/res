@@ -184,19 +184,21 @@
             <div class="card">
               <div class="card-header bg-primary text-white">
                 <h4 class="mb-0">Individual Receipts ({{$sales->total()}})</h4>
+                <small>Click any row to view order details</small>
               </div>
               <div class="card-body p-0">
-                <table class="table table-hover mb-0">
-                  <thead class="thead-light">
+                <table class="table table-striped mb-0">
+                  <thead class="thead-dark">
                     <tr>
+                      <th width="3%"></th>
                       <th width="5%">#</th>
                       <th width="10%">Receipt ID</th>
-                      <th width="20%">Date & Time</th>
-                      <th width="15%">Table</th>
-                      <th width="15%">Staff</th>
-                      <th width="15%" class="text-right">Bill Amount</th>
+                      <th width="18%">Date & Time</th>
+                      <th width="14%">Table</th>
+                      <th width="14%">Staff</th>
+                      <th width="13%" class="text-right">Bill Amount</th>
                       <th width="10%" class="text-right">S/C</th>
-                      <th width="10%" class="text-right">Total</th>
+                      <th width="13%" class="text-right">Total</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -204,9 +206,10 @@
                       $countSale = ($sales->currentPage() - 1) * $sales->perPage() + 1;
                     @endphp 
                     @foreach($sales as $sale)
-                      <tr data-toggle="collapse" data-target="#receipt-{{$sale->id}}" class="clickable-row" style="cursor: pointer;">
+                      <tr data-toggle="collapse" data-target="#receipt-{{$sale->id}}" class="clickable-row receipt-main-row" style="cursor: pointer;">
+                        <td><i class="fas fa-chevron-right expand-icon"></i></td>
                         <td>{{$countSale++}}</td>
-                        <td><strong>{{$sale->id}}</strong></td>
+                        <td><strong>#{{$sale->id}}</strong></td>
                         <td>{{date("m/d/Y H:i", strtotime($sale->updated_at))}}</td>
                         <td>{{$sale->table_name}}</td>
                         <td>{{$sale->user_name}}</td>
@@ -214,26 +217,28 @@
                         <td class="text-right">Rs {{number_format($sale->total_recieved, 2)}}</td>
                         <td class="text-right"><strong>Rs {{number_format($sale->change, 2)}}</strong></td>
                       </tr>
-                      <tr class="collapse" id="receipt-{{$sale->id}}">
-                        <td colspan="8" class="bg-light">
-                          <div class="p-3">
-                            <h6 class="text-muted mb-2">Items Ordered:</h6>
-                            <table class="table table-sm table-bordered mb-0">
-                              <thead>
+                      <tr class="collapse receipt-details-row" id="receipt-{{$sale->id}}">
+                        <td colspan="9" class="p-0" style="background-color: #f8f9fa; border-left: 4px solid #007bff;">
+                          <div class="p-4">
+                            <h6 class="font-weight-bold mb-3" style="color: #333;">
+                              <i class="fas fa-utensils"></i> Items Ordered:
+                            </h6>
+                            <table class="table table-sm mb-0" style="background-color: white;">
+                              <thead class="thead-light">
                                 <tr>
-                                  <th>Item Name</th>
-                                  <th class="text-center">Quantity</th>
-                                  <th class="text-right">Unit Price</th>
-                                  <th class="text-right">Total</th>
+                                  <th style="width: 50%;">Item Name</th>
+                                  <th class="text-center" style="width: 15%;">Quantity</th>
+                                  <th class="text-right" style="width: 17.5%;">Unit Price</th>
+                                  <th class="text-right" style="width: 17.5%;">Total</th>
                                 </tr>
                               </thead>
                               <tbody>
                                 @foreach($sale->saleDetails as $saleDetail)
                                   <tr>
-                                    <td>{{$saleDetail->menu_name}}</td>
-                                    <td class="text-center">{{$saleDetail->quantity}}</td>
+                                    <td><strong>{{$saleDetail->menu_name}}</strong></td>
+                                    <td class="text-center"><span class="badge badge-primary">{{$saleDetail->quantity}}</span></td>
                                     <td class="text-right">Rs {{number_format($saleDetail->menu_price, 2)}}</td>
-                                    <td class="text-right">Rs {{number_format($saleDetail->menu_price * $saleDetail->quantity, 2)}}</td>
+                                    <td class="text-right"><strong>Rs {{number_format($saleDetail->menu_price * $saleDetail->quantity, 2)}}</strong></td>
                                   </tr>
                                 @endforeach
                               </tbody>
@@ -323,13 +328,57 @@
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
   
   <style>
-    .clickable-row:hover {
-      background-color: #f8f9fa !important;
+    /* Faster collapse animation */
+    .collapse {
+      transition: height 0.2s ease !important;
     }
+    
+    /* Receipt row styling */
+    .receipt-main-row {
+      transition: all 0.15s ease;
+    }
+    
+    .receipt-main-row:hover {
+      background-color: #e3f2fd !important;
+      transform: scale(1.005);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    /* Chevron icon animation */
+    .expand-icon {
+      transition: transform 0.2s ease;
+      color: #007bff;
+      font-size: 12px;
+    }
+    
+    .receipt-main-row[aria-expanded="true"] .expand-icon {
+      transform: rotate(90deg);
+    }
+    
+    /* Details section styling */
+    .receipt-details-row {
+      transition: all 0.2s ease;
+    }
+    
+    .receipt-details-row td {
+      border-top: none !important;
+    }
+    
+    /* Improved table striping for receipts */
+    .table-striped tbody tr:nth-of-type(odd) {
+      background-color: rgba(0,0,0,.02);
+    }
+    
+    .table-striped tbody tr:nth-of-type(even) {
+      background-color: rgba(0,0,0,.00);
+    }
+    
+    /* Card styling */
     .card {
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       border-radius: 8px;
     }
+    
     .card-header h4 {
       font-weight: 600;
     }
@@ -342,6 +391,16 @@
           });
           $('#date-end').datetimepicker({
             format : 'L'
+          });
+          
+          // Faster collapse speed
+          $.fn.collapse.Constructor.TRANSITION_DURATION = 200;
+          
+          // Track expanded state and rotate chevron
+          $('.receipt-main-row').on('click', function() {
+            $(this).attr('aria-expanded', function(i, attr) {
+              return attr == 'true' ? 'false' : 'true';
+            });
           });
           
           // Add click hint for expandable rows
