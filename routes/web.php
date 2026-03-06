@@ -74,6 +74,9 @@ Route::middleware(['auth'])->group(function(){
 
      Route::post('/cashier/printOrder', 'App\Http\Controllers\Cashier\CashierController@printOrder');
      
+     // Admin only - clear table
+     Route::post('/cashier/clearTable', 'App\Http\Controllers\Cashier\CashierController@clearTable')->middleware('VerifyAdmin');
+     
       // routes for petty cash
 
     Route::get('pettycash', 'App\Http\Controllers\PettycashController@index')->name('pettycash');

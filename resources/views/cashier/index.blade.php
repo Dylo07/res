@@ -772,6 +772,52 @@ $(document).ready(function(){
             }
         });
     });
+
+    // Clear Table (Admin only)
+    $("#order-detail").on("click", ".btn-clear-table", function(){
+        var tableId = $(this).data('table-id');
+        
+        if(confirm('⚠️ WARNING: This will permanently delete the current order and clear the table.\n\nAre you sure you want to continue?')){
+            $.ajax({
+                type: "POST",
+                data: {
+                    "_token": $('meta[name="csrf-token"]').attr('content'),
+                    "table_id": tableId
+                },
+                url: "/cashier/clearTable",
+                success: function(response){
+                    if(response.success){
+                        // Clear the order details
+                        $("#order-detail").html('<div class="alert alert-success"><i class="fas fa-check-circle"></i> Table cleared successfully!</div>');
+                        $("#selected-table").html('');
+                        
+                        // Update table status to available
+                        var $tableCard = $(`.table-card[data-id="${tableId}"]`);
+                        $tableCard.removeClass('occupied selected').addClass('available');
+                        $tableCard.find('.table-status').removeClass('bg-warning').addClass('bg-success').text('Available');
+                        $tableCard.find('.table-icon').css('color', '#10b981');
+                        
+                        // Reset selected table
+                        SELECTED_TABLE_ID = "";
+                        SELECTED_TABLE_NAME = "";
+                        
+                        // Show success message
+                        alert('✓ Table cleared successfully!');
+                    } else {
+                        alert('Error: ' + response.message);
+                    }
+                },
+                error: function(xhr, status, error){
+                    if(xhr.status === 403){
+                        alert('⛔ Access Denied: Only administrators can clear tables.');
+                    } else {
+                        alert('Error clearing table. Please try again.');
+                    }
+                    console.error('Error:', error);
+                }
+            });
+        }
+    });
 });
 </script>
 @endsection

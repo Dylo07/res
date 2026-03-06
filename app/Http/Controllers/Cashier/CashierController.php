@@ -176,6 +176,14 @@ class CashierController extends Controller
         if($showBtnPayment){
             $html .= '<button data-id="'.$sale_id.'" data-totalAmount="'.$sale->total_price.'" class="btn btn-success btn-block btn-payment" data-toggle="modal" data-target="#exampleModal">Payment</button>';
             $html .= '<button data-id="'.$sale_id.'" class="btn btn-dark btn-block btn-payment printKot">Print KOT</button>';
+            
+            // Admin-only Clear Table button (shown after order is confirmed)
+            $user = Auth::user();
+            if($user && $user->is_admin == 1){
+                $html .= '<button data-table-id="'.$sale->table_id.'" class="btn btn-danger btn-block btn-clear-table mt-2">
+                    <i class="fas fa-trash-alt"></i> Clear Table (Admin Only)
+                </button>';
+            }
         }else{
             $html .= '<button data-id="'.$sale_id.'" class="btn btn-warning btn-block btn-confirm-order">Confirm Order</button>';
         }
@@ -405,5 +413,40 @@ class CashierController extends Controller
         $sale = Sale::find($saleID);
         $saleDetails = SaleDetail::get()->where('sale_id',$saleID)->where('count',2);
         return view('cashier.printOrder')->with('sale',$sale)->with('saleDetails', $saleDetails);
+    }
+
+    /**
+     * Clear table - Admin only
+     * Deletes unpaid sale and all sale details, sets table to available
+     */
+    public function clearTable(Request $request){
+        $table_id = $request->table_id;
+        
+        // Find unpaid sale for this table
+        $sale = Sale::where('table_id', $table_id)->where('sale_status', 'unpaid')->first();
+        
+        if($sale){
+            // Delete all sale details
+            SaleDetail::where('sale_id', $sale->id)->delete();
+            
+            // Delete the sale
+            $sale->delete();
+            
+            // Set table to available
+            $table = Table::find($table_id);
+            $table->status = "available";
+            $table->save();
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Table cleared successfully',
+                'tableId' => $table_id
+            ]);
+        }
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'No unpaid order found for this table'
+        ]);
     }
 }
