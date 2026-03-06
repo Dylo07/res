@@ -179,7 +179,7 @@ class CashierController extends Controller
             
             // Admin-only Clear Table button (shown after order is confirmed)
             $user = Auth::user();
-            if($user && $user->is_admin == 1){
+            if($user && $user->role == 'admin'){
                 $html .= '<button data-table-id="'.$sale->table_id.'" class="btn btn-danger btn-block btn-clear-table mt-2">
                     <i class="fas fa-trash-alt"></i> Clear Table (Admin Only)
                 </button>';
